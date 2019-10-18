@@ -1,0 +1,13 @@
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for item in messages %}
+      {{ item }}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<form method="post">
+  <input type="text" value="" name="email" id="email"/>
+  <input type="password" value="" name="password" id="password"/>
+  <input type="submit" value="ayooo" name="submit" id="submit"/>
+</form>

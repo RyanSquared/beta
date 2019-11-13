@@ -21,4 +21,4 @@ setup(
         "postgres": "psycopg2-binary",
         "mysql": "pymysql",
     },
-    install_requires=['flask', 'flask_sqlalchemy', 'gigaspoon'])
+    install_requires=['flask', 'flask_sqlalchemy', 'gigaspoon', 'mediapanel'])

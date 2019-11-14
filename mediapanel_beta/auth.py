@@ -1,5 +1,6 @@
 import string  # password requirements
 import hashlib  # password hash generation and verification
+import uuid  # UUID4 generation
 
 import gigaspoon as gs  # form validation
 
@@ -66,7 +67,7 @@ class Register(AppRouteView):
 
     def handle_post(self, values):
         # Create client
-        client = Client(email=values["email"])
+        client = Client(email=values["email"], uuid=str(uuid.uuid4()))
         db.session.add(client)
         db.session.commit()
 
@@ -91,7 +92,10 @@ class Register(AppRouteView):
         except Exception:
             db.session.delete(client)
             db.session.commit()
-        return {}
+        return {
+            "email": client.email,
+            "uuid": client.uuid,
+        }
 
 
 class Login(AppRouteView):
@@ -116,7 +120,10 @@ class Login(AppRouteView):
         session["user_id"] = user.user_id
         session["client_id"] = user.client_id
 
-        return {}
+        return {
+            "email": email,
+            "uuid": user.client.uuid
+        }
 
 
 blueprint.add_url_rule("/register", view_func=Register.as_view("register"))

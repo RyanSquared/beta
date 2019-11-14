@@ -92,10 +92,9 @@ class Register(AppRouteView):
         except Exception:
             db.session.delete(client)
             db.session.commit()
-        return {
-            "email": client.email,
-            "uuid": client.uuid,
-        }
+        return response("Successfully registered %s" % values["email"],
+                        payload={"email": values["email"],
+                                 "uuid": user.client.uuid})
 
 
 class Login(AppRouteView):
@@ -120,10 +119,8 @@ class Login(AppRouteView):
         session["user_id"] = user.user_id
         session["client_id"] = user.client_id
 
-        return {
-            "email": email,
-            "uuid": user.client.uuid
-        }
+        return response("Successfully logged in as %s" % email,
+                        payload={"email": email, "uuid": user.client.uuid})
 
 
 blueprint.add_url_rule("/register", view_func=Register.as_view("register"))

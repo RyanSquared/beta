@@ -38,7 +38,7 @@ def create_app(test_config: dict = None) -> Flask:
         @app.before_request
         def redirect_insecure():
             if not request.is_secure:
-                return redirect(request.uri.replace("http://", "https://"))
+                return redirect(request.url.replace("http", "https", 1))
 
     @app.errorhandler(403)
     def not_authorized(e):

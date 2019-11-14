@@ -28,7 +28,7 @@ HTTP 400:
 
 ```
 # curl -v -XPOST https://beta.mediapanel.fusionscript.info/auth/register \
- -d'{"email": "1ryan@educatethewait.com", "password": "Password01", ' \
+ -d'{"email": "ryan@educatethewait.com", "password": "Password01", ' \
     '"first_name": "Ryan", "last_name": "Heywood"}' \
  -H "Content-Type: application/json"
 

@@ -1,0 +1,27 @@
+version: '3'
+services:
+  mediapanel:
+    build: .
+    ports:
+    - 5000:80
+    links:
+    - db
+    env_file:
+    # Contains:
+    # FLASK_APP
+    # FLASK_ENV
+    # FLASK_SECRET_KEY
+    # FLASK_SQLALCHEMY_DATABASE_URI
+    - config.mysql.env
+  db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: herpderp
+      MYSQL_USER: mediapanel
+      MYSQL_PASSWORD: herpderp
+      MYSQL_DATABASE: mediawall
+    volumes:
+    - db_data:/var/lib/mysql
+    - ${PWD}/schema.mysql.sql:/docker-entrypoint-initdb.d/schema.sql
+volumes:
+  db_data:

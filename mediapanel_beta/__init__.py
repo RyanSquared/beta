@@ -33,7 +33,8 @@ def create_app(test_config: dict = None) -> Flask:
         with app.app_context():
             models.db.create_all()
 
-    if app.config["ENV"] == "production":
+    if (app.config["ENV"] == "production" and
+            app.config.get("PROXY_MODE") is None):
         # require HTTPS in production, do not require in development
         @app.before_request
         def redirect_insecure():

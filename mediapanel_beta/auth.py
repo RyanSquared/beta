@@ -71,27 +71,24 @@ class Register(AppRouteView):
         db.session.add(client)
         db.session.commit()
 
-        try:
-            # Generate password hash
-            pwsalt = gen_salt(10)
-            pwhash_object = hashlib.sha512(pwsalt.encode("utf8"))
-            pwhash_object.update(values["password"].encode("utf8"))
+        # Generate password hash
+        pwsalt = gen_salt(10)
+        pwhash_object = hashlib.sha512(pwsalt.encode("utf8"))
+        pwhash_object.update(values["password"].encode("utf8"))
 
-            # Create user
-            user = User(
-                client_id=client.client_id,
-                type=UserType.client,
-                first_name=values["first_name"],
-                last_name=values["last_name"],
-                email=values["email"],
-                password=pwhash_object.hexdigest().upper(),
-                salt=pwsalt,
-                get_alert_emails=0)
-            db.session.add(user)
-            db.session.commit()
-        except Exception:
-            db.session.delete(client)
-            db.session.commit()
+        # Create user
+        user = User(
+            client_id=client.client_id,
+            type=UserType.client,
+            first_name=values["first_name"],
+            last_name=values["last_name"],
+            email=values["email"],
+            password=pwhash_object.hexdigest().upper(),
+            salt=pwsalt,
+            get_alert_emails=0)
+        db.session.add(user)
+        db.session.commit()
+
         return response("Successfully registered %s" % values["email"],
                         payload={"email": values["email"],
                                  "uuid": user.client.uuid})

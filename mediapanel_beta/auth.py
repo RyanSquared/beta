@@ -1,18 +1,24 @@
-import string  # password requirements
 import hashlib  # password hash generation and verification
+import functools  # decorators
+import string  # password requirements
 import uuid  # UUID4 generation
 
 import gigaspoon as gs  # form validation
 
 from mediapanel.db.user import UserType
 
-from flask import Blueprint, request, session
+from flask import (Blueprint, abort, flash, g, redirect, request, session,
+                   url_for)
 from werkzeug.security import gen_salt
 
 from .app_view import AppRouteView, response
 from .models import User, Client, db  # proxy for noticast util
 
 blueprint = Blueprint("auth", __name__, url_prefix="/auth")
+
+# First client to register on this instance, can spoof other users and can
+# delete devices
+ADMIN_CLIENT_ID = 1
 
 
 def check_login(password, email: str = None, user: User = None):
@@ -22,7 +28,7 @@ def check_login(password, email: str = None, user: User = None):
         raise ValueError("expected `username` or `user`, not both")
     if user is None:
         user = User.query.filter(User.email.like(email)).first()
-    if user is not None:
+    if user is not None:  # Can't use `else` because it was just set above
         hash_object = hashlib.sha512(user.salt.encode("utf8"))
         hash_object.update(password.encode("utf8"))
         if hash_object.hexdigest().lower() == user.password.lower():
@@ -122,3 +128,53 @@ class Login(AppRouteView):
 
 blueprint.add_url_rule("/register", view_func=Register.as_view("register"))
 blueprint.add_url_rule("/login", view_func=Login.as_view("login"))
+
+
+@blueprint.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("index"))
+
+
+@blueprint.before_app_request
+def load_user():
+    user = None
+    user_id = session.get("user_id")
+    if user_id is not None:
+        user = User.query.filter_by(user_id=user_id).first()
+        if user is None:
+            flash("Expected user by id: %i; contact support|danger" % user_id,
+                  "notifications")
+    else:
+        auth_header = request.headers.get("Authorization")
+        if auth_header is not None:
+            username, password = auth_header.split(" ")[-1].split(":")
+            user = check_login(password, username=username)
+    g.user = user
+
+
+def login_required(fn):
+    @functools.wraps(fn)
+    def wrapped_view(*args, **kwargs):
+        if g.user is None:
+            return abort(403)
+        return fn(*args, **kwargs)
+    return wrapped_view
+
+
+def client_required(fn):
+    @functools.wraps(fn)
+    def wrapped_view(*args, **kwargs):
+        if g.user is None or g.user.type != UserType.client:
+            return abort(403)
+        return fn(*args, **kwargs)
+    return wrapped_view
+
+
+def admin_required(fn):
+    @functools.wraps(fn)
+    def wrapped_view(*args, **kwargs):
+        if g.user is None or g.client.id != ADMIN_CLIENT_ID:
+            return abort(403)
+        return fn(*args, **kwargs)
+    return wrapped_view

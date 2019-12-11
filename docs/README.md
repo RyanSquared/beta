@@ -19,7 +19,7 @@ be copied from `curl` requests which will also be included.
 
 ## Content Management
 
-- [`/content/<type>/<target_id>/resources`](routes/content_manager#list-resources)
-- [`/content/<type>/<target_id>/resources/new`](routes/content_manager#upload-resource)
-- [`/content/<type>/<target_id>/resources/manage/<resource_id>`](routes/content_manager#manage-resource)
-- [`/content/<type>/<client_id>/file/<target_id>/<path:filename>`](routes/content_manager#resource-file)
+- [`/content/<type>/<target_id>/resources`](routes/content#list-resources)
+- [`/content/<type>/<target_id>/resources/new`](routes/content#upload-resource)
+- [`/content/<type>/<target_id>/resources/manage/<resource_id>`](routes/content#manage-resource)
+- [`/content/<type>/<client_id>/file/<target_id>/<path:filename>`](routes/content#resource-file)

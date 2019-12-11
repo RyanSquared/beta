@@ -22,8 +22,8 @@ def create_app(test_config: dict = None) -> Flask:
            if v[:6] == "FLASK_"])
 
     from .app_view import AppRouteView, response
-    from . import auth, models
-    for item in [auth, models]:
+    from . import auth, models, content_manager
+    for item in [auth, models, content_manager]:
         if getattr(item, "init_app", None) is not None:
             item.init_app(app)
         if getattr(item, "blueprint", None) is not None:
@@ -63,7 +63,7 @@ def create_app(test_config: dict = None) -> Flask:
         template_name = "index.html"
 
         def populate(self):
-            print(models.User.query.all())
+            print([x.device_id for x in models.Device.query.all()])
             return {}
 
     app.add_url_rule("/", view_func=Index.as_view("index"))

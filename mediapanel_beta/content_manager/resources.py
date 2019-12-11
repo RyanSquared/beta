@@ -55,11 +55,13 @@ class Resource(AppRouteView):
 
 
 class NewResource(AppRouteView):
+    decorators = [login_required]
     pass
 
 
 class ListResources(AppRouteView):
     # Identifiers: list_resources
+    decorators = [login_required]
 
     def populate():
         pass

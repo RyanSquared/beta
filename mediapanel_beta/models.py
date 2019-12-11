@@ -2,9 +2,9 @@ import click
 from flask.cli import with_appcontext
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import IntegrityError  # noqa: F401
+from sqlalchemy.exc import IntegrityError
 
-from mediapanel.db import Base, User, Client  # noqa: F401
+from mediapanel.db import Base, Asset, Client, Device, User
 
 db = SQLAlchemy(model_class=Base)
 

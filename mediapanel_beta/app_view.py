@@ -1,4 +1,5 @@
-from flask import flash, jsonify, redirect, render_template, request, url_for
+from flask import (flash, jsonify, redirect, render_template, Response,
+                   request, url_for)
 from flask.views import MethodView
 
 
@@ -32,16 +33,41 @@ class AppRouteView(MethodView):
     route = None
     redirect_args = {}
 
-    # Overrides
-
     def get_template_name(self):
-        # Override
+        # Overrideable
         return self.template_name
 
     def render_template(self, **context):
         return render_template(self.get_template_name(), **context)
 
-    # POST requests
+    def before_request(self, *args, **kwargs):
+        # Method is run regardless of HTTP method
+        # Override
+        pass
+
+    def after_request(self, *args, **kwargs):
+        # Method is run regardless of HTTP method
+        # Override
+        pass
+
+    # GET requests {{{
+
+    def populate(self, *args, **kwargs):
+        # Override
+        return {}
+
+    def get_json(self, *args, **kwargs):
+        values = self.populate(*args, **kwargs)
+        if isinstance(values, Response):
+            return values
+        return jsonify(values), values.get("status_code", 200)
+
+    def get_html(self, *args, **kwargs):
+        return self.render_template(**self.populate(*args, **kwargs))
+
+    # }}}
+
+    # POST requests {{{
     # All HTTP POST requests should redirect to avoid refresh-duplication, so
     # do not overwrite post_html without a redirect
 
@@ -63,6 +89,8 @@ class AppRouteView(MethodView):
     def post_json(self, *args, **kwargs):
         values = request.json
         result = self.handle_post(values, *args, **kwargs)
+        if isinstance(result, Response):
+            return result
         if "payload" in result:
             return jsonify(result["payload"]), result.get("status_code", 200)
         return (jsonify({"message": result.get("message", "no output")}),
@@ -70,33 +98,131 @@ class AppRouteView(MethodView):
 
     def post_html(self, *args, **kwargs):
         values = request.form
-        self.handle_post(values, *args, **kwargs)
+        result = self.handle_post(values, *args, **kwargs)
+        if isinstance(result, Response):
+            return result
         if self.redirect_to is not None:
             return redirect(url_for(self.redirect_to, **self.redirect_args))
         return redirect(url_for(request.url_rule.rule, **self.redirect_args))
 
-    # GET requests
+    # }}}
 
-    def populate(self, *args, **kwargs):
-        # Override
-        return {}
+    # PUT requests {{{
+    # All HTTP PUT requests should redirect to avoid refresh-duplication, so
+    # do not overwrite post_html without a redirect
 
-    def get_json(self, *args, **kwargs):
-        values = self.populate(*args, **kwargs)
-        return jsonify(values), values.get("status_code", 200)
+    def handle_put(self, values, *args, **kwargs) -> dict:
+        """
+        Must return a dict.
+        Dict Formats:
+        {
+            "payload": <JSON serializable content>[,
+            "status_code": <HTTP status number>]
+        }
+        {
+            "message": "one-liner for quick output"[,
+            "status_code": <HTTP status number>]
+        }
+        """
+        raise NotImplementedError()
 
-    def get_html(self, *args, **kwargs):
-        return self.render_template(**self.populate(*args, **kwargs))
+    def put_json(self, *args, **kwargs):
+        values = request.json
+        result = self.handle_put(values, *args, **kwargs)
+        if isinstance(result, Response):
+            return result
+        if "payload" in result:
+            return jsonify(result["payload"]), result.get("status_code", 200)
+        return (jsonify({"message": result.get("message", "no output")}),
+                result.get("status_code", 200))
 
-    # MethodView overrides
+    def put_html(self, *args, **kwargs):
+        values = request.form
+        result = self.handle_put(values, *args, **kwargs)
+        if isinstance(result, Response):
+            return result
+        if self.redirect_to is not None:
+            return redirect(url_for(self.redirect_to, **self.redirect_args))
+        return redirect(url_for(request.url_rule.rule, **self.redirect_args))
+
+    # }}}
+
+    # DELETE requests {{{
+    # All HTTP PUT requests should redirect to avoid refresh-duplication, so
+    # do not overwrite post_html without a redirect
+
+    def handle_delete(self, values, *args, **kwargs) -> dict:
+        """
+        Must return a dict.
+        Dict Formats:
+        {
+            "payload": <JSON serializable content>[,
+            "status_code": <HTTP status number>]
+        }
+        {
+            "message": "one-liner for quick outdelete"[,
+            "status_code": <HTTP status number>]
+        }
+        """
+        raise NotImplementedError()
+
+    def delete_json(self, *args, **kwargs):
+        values = request.json
+        result = self.handle_delete(values, *args, **kwargs)
+        if isinstance(result, Response):
+            return result
+        if "payload" in result:
+            return jsonify(result["payload"]), result.get("status_code", 200)
+        return (jsonify({"message": result.get("message", "no outdelete")}),
+                result.get("status_code", 200))
+
+    def delete_html(self, *args, **kwargs):
+        values = request.form
+        result = self.handle_delete(values, *args, **kwargs)
+        if isinstance(result, Response):
+            return result
+        if self.redirect_to is not None:
+            return redirect(url_for(self.redirect_to, **self.redirect_args))
+        return redirect(url_for(request.url_rule.rule, **self.redirect_args))
+
+    # }}}
+
+    # MethodView overrides {{{
 
     def get(self, *args, **kwargs):
+        self.before_request(*args, **kwargs)
         if request.is_json:
-            return self.get_json(*args, **kwargs)
-        return self.get_html(*args, **kwargs)
+            result = self.get_json(*args, **kwargs)
+        else:
+            result = self.get_html(*args, **kwargs)
+        self.after_request(*args, **kwargs)
+        return result
 
     def post(self, *args, **kwargs):
+        self.before_request(*args, **kwargs)
         if request.is_json:
-            return self.post_json(*args, **kwargs)
+            result = self.post_json(*args, **kwargs)
         else:
-            return self.post_html(*args, **kwargs)
+            result = self.post_html(*args, **kwargs)
+        self.after_request(*args, **kwargs)
+        return result
+
+    def put(self, *args, **kwargs):
+        self.before_request(*args, **kwargs)
+        if request.is_json:
+            result = self.put_json(*args, **kwargs)
+        else:
+            result = self.put_html(*args, **kwargs)
+        self.after_request(*args, **kwargs)
+        return result
+
+    def delete(self, *args, **kwargs):
+        self.before_request(*args, **kwargs)
+        if request.is_json:
+            result = self.delete_json(*args, **kwargs)
+        else:
+            result = self.delete_html(*args, **kwargs)
+        self.after_request(*args, **kwargs)
+        return result
+
+    # }}}

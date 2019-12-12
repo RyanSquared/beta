@@ -10,6 +10,16 @@ Examples will be formatted in such a way that `>` represents data sent to the
 server, and `<` represents data received from the server. The examples will
 be copied from `curl` requests which will also be included.
 
+Examples make use of the cURL command line interface `curl`, with the following
+aliases for convenience:
+
+```sh
+export COOKIEJAR="$HOME/.config/curl/cookiejar"
+mkdir -p "$HOME/.config/curl"
+alias curl="curl --cookie $COOKIEJAR --cookie-jar $COOKIEJAR"
+alias jurl="curl --cookie $COOKIEJAR --cookie-jar $COOKIEJAR -H 'Content-Type: application/json'"
+```
+
 # Routes
 
 ## Authentication and Account Management

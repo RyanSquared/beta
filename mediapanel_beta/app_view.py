@@ -147,8 +147,48 @@ class AppRouteView(MethodView):
 
     # }}}
 
+    # PATCH requests {{{
+    # All HTTP PATCH requests should redirect to avoid refresh-duplication, so
+    # do not overwrite post_html without a redirect
+
+    def handle_patch(self, values, *args, **kwargs) -> dict:
+        """
+        Must return a dict.
+        Dict Formats:
+        {
+            "payload": <JSON serializable content>[,
+            "status_code": <HTTP status number>]
+        }
+        {
+            "message": "one-liner for quick output"[,
+            "status_code": <HTTP status number>]
+        }
+        """
+        raise NotImplementedError()
+
+    def patch_json(self, *args, **kwargs):
+        values = request.json
+        result = self.handle_patch(values, *args, **kwargs)
+        if isinstance(result, Response):
+            return result
+        if "payload" in result:
+            return jsonify(result["payload"]), result.get("status_code", 200)
+        return (jsonify({"message": result.get("message", "no output")}),
+                result.get("status_code", 200))
+
+    def patch_html(self, *args, **kwargs):
+        values = request.form
+        result = self.handle_patch(values, *args, **kwargs)
+        if isinstance(result, Response):
+            return result
+        if self.redirect_to is not None:
+            return redirect(url_for(self.redirect_to, **self.redirect_args))
+        return redirect(url_for(request.url_rule.rule, **self.redirect_args))
+
+    # }}}
+
     # DELETE requests {{{
-    # All HTTP PUT requests should redirect to avoid refresh-duplication, so
+    # All HTTP DELETE requests should redirect to avoid refresh-duplication, so
     # do not overwrite post_html without a redirect
 
     def handle_delete(self, values, *args, **kwargs) -> dict:
@@ -213,6 +253,15 @@ class AppRouteView(MethodView):
             result = self.put_json(*args, **kwargs)
         else:
             result = self.put_html(*args, **kwargs)
+        self.after_request(*args, **kwargs)
+        return result
+
+    def patch(self, *args, **kwargs):
+        self.before_request(*args, **kwargs)
+        if request.is_json:
+            result = self.patch_json(*args, **kwargs)
+        else:
+            result = self.patch_html(*args, **kwargs)
         self.after_request(*args, **kwargs)
         return result
 

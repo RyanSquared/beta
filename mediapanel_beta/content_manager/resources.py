@@ -1,5 +1,5 @@
 from flask import (abort, current_app, g, safe_join,
-                   send_from_directory, session, url_for)
+                   send_from_directory, url_for)
 from flask.views import MethodView
 
 from ..app_view import AppRouteView, response
@@ -27,7 +27,7 @@ class Resource(AppRouteView):
     def before_request(self, _type, target_id, resource_id):
         assert resource_id is not None, "missing resource ID"
         # Load object into flask.g
-        resource = Asset.query.filter_by(client_id=session["client_id"],
+        resource = Asset.query.filter_by(client_id=g.user.client_id,
                                          id=resource_id).first()
         if resource is None:
             return abort(404)  # Resource was not found, raise 404
@@ -117,7 +117,7 @@ class Resource(AppRouteView):
         })
 
     def handle_delete(self, _type, target_id, resource_id):
-        # Delete record AND file
+        # Delete record, file, and commit deletion to db
         pass
 
 
@@ -132,7 +132,7 @@ class ListResources(AppRouteView):
 
     def populate(self, _type, target_id):
         if _type == "device":
-            resources = Asset.query.filter_by(client_id=session["client_id"],
+            resources = Asset.query.filter_by(client_id=g.user.client_id,
                                               group_id=0,
                                               device_id=target_id)
             return {"type": _type, "target_id": target_id, "resources": [{
@@ -152,7 +152,7 @@ class ListResources(AppRouteView):
                                         filename=resource.filename),
             } for resource in resources.all()]}
         else:
-            resources = Asset.query.filter_by(client_id=session["client_id"],
+            resources = Asset.query.filter_by(client_id=g.user.client_id,
                                               group_id=target_id)
             return {"type": _type, "target_id": target_id, "resources": [{
                 "id": resource.id,

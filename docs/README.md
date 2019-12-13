@@ -20,6 +20,49 @@ alias curl="curl --cookie $COOKIEJAR --cookie-jar $COOKIEJAR"
 alias jurl="curl --cookie $COOKIEJAR --cookie-jar $COOKIEJAR -H 'Content-Type: application/json'"
 ```
 
+To use the Authorization header with the Python `requests` library, the method
+should be called like:
+
+```py
+import requests
+
+API_URL = "https://beta.getmediapanel.com"
+AUTH = ("your_email", "your_password")
+
+response = requests.get(f"{API_URL}/content/device/00f6c1ee/resources",
+			auth=AUTH)
+```
+
+Additionally, you can use sessions to persist authorization:
+
+```py
+import requests
+
+API_URL = "https://beta.getmediapanel.com"
+session = requests.Session()
+
+session.auth = ("your_email", "your_password")
+response = session.get(f"{API_URL}/content/device/00f6c1ee/resources")
+```
+
+You can also use sessions to store cookies, which isn't necessary, but can
+avoid sending the same Authorization information for every request:
+
+```py
+import requests
+API_URL = "https://beta.getmediapanel.com"
+session = requests.Session()
+
+session.post(f"{API_URL}/auth/login", json={"email": "your_email",
+					    "password": "your_password"})
+response = session.get(f"{API_URL}/content/device/00f6c1ee/resources")
+```
+
+Remember that if you want to log in as a different user, you should create a
+new session or access the `/auth/logout` route to clear the current session's
+cookie; even if you're not specifically using cookie-based authentication, the
+cookie may be set anyways.
+
 # Routes
 
 ## Authentication and Account Management

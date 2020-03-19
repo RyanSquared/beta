@@ -33,7 +33,7 @@
     <nav class="navbar is-spaced is-light" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
         <!-- Start of navbar -->
-        <a class="navbar-item is-active" href="/">
+        <a class="navbar-item" href="/">
           <img src="{{ url_for('static', filename='png/mediapanel_logo.png') }}"/>
         </a>
 
@@ -48,16 +48,18 @@
 
       <div id="main_navbar" class="navbar-menu is-active">
         <div class="navbar-start">
-          <a class="navbar-item" href="">Manage Devices</a>
-          <a class="navbar-item" href="">Manage Groups</a>
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link" href="#">Manage Users</a>
-            <div class="navbar-dropdown">
-              <a class="navbar-item" href="">Users</a>
-              <a class="navbar-item" href="">Permission Profiles</a>
+          {% if g.user %}
+            <a class="navbar-item" href="">Manage Devices</a>
+            <a class="navbar-item" href="">Manage Groups</a>
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Manage Users</a>
+              <div class="navbar-dropdown">
+                <a class="navbar-item" href="">Users</a>
+                <a class="navbar-item" href="">Permission Profiles</a>
+              </div>
             </div>
-          </div>
-          <a class="navbar-item" href="">View Licenses</a>
+            <a class="navbar-item" href="">View Licenses</a>
+          {% endif %}
           <a class="navbar-item" href="https://mediapanel.github.io/beta">Documentation</a>
           {% block navbar_start %}
           {% endblock %}
@@ -66,16 +68,21 @@
         <div class="navbar-end">
           {% block navbar_end %}
           {% endblock %}
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link" href="#">Hi,&nbsp;<span>User</span></a>
-            <div class="navbar-dropdown is-right">
-              <a class="navbar-item" href="">Account Settings</a>
-              <a class="navbar-item" href="">User Settings</a>
-              <hr class="navbar-divider">
-              <a class="navbar-item" href="/auth/logout">Log Out</a>
+          {% if g.user %}
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link" href="#">Hi, {{ g.user.first_name }}</a>
+              <div class="navbar-dropdown is-right">
+                <a class="navbar-item" href="">Account Settings</a>
+                <a class="navbar-item" href="">User Settings</a>
+                <hr class="navbar-divider">
+                <a class="navbar-item" href="/auth/logout">Log Out</a>
+              </div>
             </div>
-          </div>
-          <a class="navbar-item" href="mailto:support@getmediapanel.com">Support</a>
+            <a class="navbar-item" href="mailto:support@getmediapanel.com">Support</a>
+            <!-- ::TODO:: put client ID and user ID into above -->
+          {% else %}
+            <a class="navbar-item" href="mailto:support@getmediapanel.com">Support</a>
+          {% endif %}
         </div>
       </div>
     </nav>

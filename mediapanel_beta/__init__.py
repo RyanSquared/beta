@@ -141,16 +141,19 @@ def create_app(test_config: dict = None) -> Flask:
             upcoming_events = []
             upcoming_range = timedelta(days=30)
             for device in devices:
-                event_config = EventsConfig.from_v6_id(
-                    g.client.client_id, device["device_id"],
-                    base_path=app.config["RESOURCES_FOLDER"])
-                for event_name, event in event_config.events.items():
-                    for person, date in event.events:
-                        event_range = date.replace(year=now.year) - now.date()
-                        print(event_range, upcoming_range)
-                        if timedelta(0) < event_range < upcoming_range:
-                            upcoming_events.append((event_name, person.name,
-                                                    date.strftime("%B %d")))
+                try:
+                    event_config = EventsConfig.from_v6_id(
+                        g.client.client_id, device["device_id"],
+                        base_path=app.config["RESOURCES_FOLDER"])
+                    for event_name, event in event_config.events.items():
+                        for person, date in event.events:
+                            event_range = date.replace(year=now.year) - now.date()
+                            if timedelta(0) < event_range < upcoming_range:
+                                upcoming_events.append((event_name, person.name,
+                                                        date.strftime("%B %d")))
+                except FileNotFoundError:
+                    # Expected if a device has no events
+                    pass
             data["upcoming_events"] = upcoming_events
             # }}}
 

@@ -87,11 +87,24 @@
       </div>
     </nav>
 
-    <!-- "At a Glance" page -->
     <section class="section">
-      <div class="container is-widescreen">
-        {% block body %}
-        {% endblock %}
+      <div class="columns">
+        <div class="column is-2">
+          {% with messages = get_flashed_messages(category_filter="notifications") %}
+            {% for message in messages %}
+              {% set message_values = message.split("|") %}
+              <div class="notification is-{{ message_values[1] }}">
+                <!-- ::TODO:: Vue @click remove parent -->
+                <!--button class="delete"></button-->
+                {{ message_values[0] }}
+              </div>
+            {% endfor %}
+          {% endwith %}
+        </div>
+        <div class="column is-8">
+          {% block body %}
+          {% endblock %}
+        </div>
       </div>
     </section>
     <!-- Footer -->

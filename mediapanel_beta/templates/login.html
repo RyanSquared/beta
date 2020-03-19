@@ -3,13 +3,10 @@
 {% block body %}
 <!-- no card -->
 <div class="columns">
-  <div class="column is-6 is-offset-3">
-    <!--
-    <a href="https://educatethewait.com">
-      <img class="col-xs-12" src="/assets/img/educate-the-wait/tagline-horizontal-flat.png" />
-    </a>
-    <img class="col-xs-12" src="/assets/img/mediaPanel-logo-notagline-dark.png" alt="mediaPanel">
-    -->
+  <div class="column is-4 is-offset-4">
+    <div class="columns is-gapless is-multiline"><!-- branding -->
+      <img class="column is-12" src="{{ url_for('static', filename='png/mediapanel_logo.png') }}" />
+    </div>
     <form method="POST">
       <div class="field">
         <label class="label">Email address</label>

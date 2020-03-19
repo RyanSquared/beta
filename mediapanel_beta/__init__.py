@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 
-from flask import Flask, request, redirect, render_template, jsonify
+from flask import Flask, g, request, redirect, render_template, jsonify
 from werkzeug.contrib.fixers import ProxyFix
 
 import gigaspoon as gs
@@ -70,13 +70,14 @@ def create_app(test_config: dict = None) -> Flask:
         overview, and a storage space overview.
         """
 
+        decorators = [auth.login_redirect]
         template_name = "index.html"
 
         def populate(self):
-            now = datetime.fromtimestamp(1568877369)  # TESTING
+            now = datetime.now()
             data = {
                 "current_time": int(now.timestamp()),
-                "current_version": "60707",  # ::TODO:: get from VERSION.json?
+                "current_version": "60708",  # ::TODO:: get from VERSION.json?
             }
 
             # Get device information {{{
@@ -84,8 +85,7 @@ def create_app(test_config: dict = None) -> Flask:
             online = []
             offline = []
             out_of_date = []
-            device_query = models.Device.query.filter_by(client_id=1)
-            for device in device_query.all():
+            for device in g.user.allowed_devices:
                 last_ping = device.last_ping.timestamp()
                 storage_percentage = 1 - device.free_disk / device.total_disk
                 offline_delta = data["current_time"] - last_ping
@@ -104,7 +104,6 @@ def create_app(test_config: dict = None) -> Flask:
                            version_numbers[2].rjust(2, "0"))
 
                 device_json = {
-                    "client_id": device.client_id,  # TODO sessionize
                     "device_id": device.device_id,
                     "nickname": device.nickname,
                     "system_version": version,
@@ -142,7 +141,7 @@ def create_app(test_config: dict = None) -> Flask:
             upcoming_range = timedelta(days=30)
             for device in devices:
                 event_config = EventsConfig.from_v6_id(
-                    device["client_id"], device["device_id"],
+                    g.client.client_id, device["device_id"],
                     base_path=app.config["RESOURCES_FOLDER"])
                 for event_name, event in event_config.events.items():
                     for person, date in event.events:
@@ -152,7 +151,6 @@ def create_app(test_config: dict = None) -> Flask:
                             upcoming_events.append((event_name, person.name,
                                                     date.strftime("%B %d")))
             data["upcoming_events"] = upcoming_events
-            print(data["upcoming_events"])
             # }}}
 
             return data

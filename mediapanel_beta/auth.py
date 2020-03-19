@@ -133,7 +133,7 @@ blueprint.add_url_rule("/login", view_func=Login.as_view("login"))
 @blueprint.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("index"))
+    return redirect(url_for(".login"))
 
 
 @blueprint.before_app_request
@@ -150,7 +150,20 @@ def load_user():
         if auth_header is not None:
             username, password = auth_header.split(" ")[-1].split(":")
             user = check_login(password, username=username)
-    g.user = user
+    if user is not None:
+        g.user = user
+        g.client = user.client
+    else:
+        g.user = g.client = None
+
+
+def login_redirect(fn):
+    @functools.wraps(fn)
+    def wrapped_view(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for("auth.login"))
+        return fn(*args, **kwargs)
+    return wrapped_view
 
 
 def login_required(fn):
@@ -174,7 +187,7 @@ def client_required(fn):
 def admin_required(fn):
     @functools.wraps(fn)
     def wrapped_view(*args, **kwargs):
-        if g.user is None or g.client.id != ADMIN_CLIENT_ID:
+        if g.user is None or g.client.client_id != ADMIN_CLIENT_ID:
             return abort(403)
         return fn(*args, **kwargs)
     return wrapped_view

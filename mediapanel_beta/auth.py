@@ -115,7 +115,7 @@ class Login(AppRouteView):
 
         user = check_login(values["password"], email=email)
         if user is None:
-            self.redirect_to = request.url_rule.rule
+            self.redirect_to = ".login"
             return response("Username or password incorrect", 401)
 
         session.clear()

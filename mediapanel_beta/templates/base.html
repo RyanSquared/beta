@@ -96,16 +96,26 @@
     </section>
     <!-- Footer -->
     <footer class="footer">
-      <div class="content has-text-centered">
-        <p>
-          Visit
-          <a href="https://educatethewait.com">Educate the Wait</a>
-          to purchase new mediaPanel devices, manage your license subscriptions,
-          and learn more about other services that we have to offer.
-        </p>
-        <p>
-          &copy; 2020 Great Plains Marketing
-        </p>
+      <div class="container content has-text-centered">
+        <div class="columns">
+          <div class="column is-4">
+            <a href="https://educatethewait.com">
+              <img class="column is-12" src="{{ url_for('static',
+                filename='png/educatethewait_logo.png') }}" />
+            </a>
+          </div>
+          <div class="column is-8">
+            <p>
+            Visit
+            <a href="https://educatethewait.com">Educate the Wait</a>
+            to purchase new mediaPanel devices, manage your license subscriptions,
+            and learn more about other services that we have to offer.
+            </p>
+            <p>
+            &copy; 2020 Great Plains Marketing
+            </p>
+          </div>
+        </div>
       </div>
     </footer>
   </body>

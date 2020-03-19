@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block navbar_start %}
+<form class="navbar-item">
+  <div class="field has-addons">
+    <p class="control">
+      <input class="input is-small" type="text" name="search">
+    </p>
+    <p class="control">
+      <input class="button is-small" type="submit" value="Search">
+    </p>
+  </div>
+</form>
+{% endblock %}
+
+{% block body %}
+<div class="card">
+  <!-- Page Content -->
+  <div class="card-content">
+    <div class="content">
+      <h3 class="title is-h3 has-text-grey-dark">
+        Your mediaPanels
+        {% if query %}
+        <small>(Searched for: {{ query }})</small>
+        {% endif %}
+      </h3>
+      <p>
+        <!-- Add New, Clone Files -->
+        <a class="button is-primary" href="/manage/device/new">
+          <i class="material-icons">add</i>
+          Activate new mediaPanel
+        </a>
+        <a class="button is-warning" href="/manage/device/clone">
+          <i class="material-icons">content_copy</i>
+          Clone files to a different mediaPanel
+        </a>
+      </p>
+
+      <!-- List of All Devices -->
+      <div class="table-container">
+        <table class="table is-fullwidth is-striped is-narrow">
+          <thead>
+            <tr>
+              <th>Device ID</th>
+              <th>Name</th>
+              <th>Group</th>
+              <th>Version</th>
+              <th>Storage</th>
+              <th>IP Address</th>
+              <th>Status</th>
+              <th class="has-text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {% for device in devices %}
+              <td>{{ device.device_id }}</td>
+              <td>{{ device.nickname }}</td>
+              {% if device.groups %}
+                <td>{{ device.groups | map(attribute="name") | join(", ") }}</td>
+              {% else %}
+                <td>None</td>
+              {% endif %}
+              <td><span class="tag is-success">{{ device.system_version }}</span></td>
+              <td>
+              {% if device.free_disk / device.total_disk > 0.75 %}
+                <!-- danger -->
+                <span class="tag is-danger">
+                  {{ ((1 - device.free_disk / device.total_disk) * 100) | round | int}}% Free
+                </span>
+              {% elif device.free_disk / device.total_disk > 0.5 %}
+                <!-- warning -->
+                <span class="tag is-warning">
+                  {{ ((1 - device.free_disk / device.total_disk) * 100) | round | int }}% Free
+                </span>
+              {% else %}
+                <!-- warning -->
+                <span class="tag is-success">
+                  {{ ((1 - device.free_disk / device.total_disk) * 100) | round | int}}% Free
+                </span>
+              {% endif %}
+              </td>
+              <td>{{ device.device_ip }}</td>
+              <td>
+                {% if device.is_offline %}
+                  <span class="tag is-info">Offline for {{ device.offline_for }}</span></td>
+                {% else %}
+                  <span class="tag is-info">Online <i class="material-icons">wifi</i></span></td>
+                {% endif %}
+              <td>
+                <div class="buttons has-addons is-right">
+                  <a class="button is-info" href="/manage/device/by-id/{{ device.device_id }}" aria-label="Settings">
+                    <i class="material-icons">settings</i>
+                  </a>
+                  <a class="button is-link" href="/manage/device/by-id/{{ device.device_id }}" aria-label="Live View">
+                    <i class="material-icons">screen_share</i>
+                  </a>
+                  <a class="button is-danger" href="/manage/devices/by-id/{{ device.device_id }}" aria-label="Reboot">
+                    <i class="material-icons">power_settings_new</i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

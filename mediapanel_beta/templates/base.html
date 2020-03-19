@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>mediaPanel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bulma.css') }}" type="text/css" charset="utf-8">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style type="text/css" media="screen">
+      .card:not(:first-child) {
+        margin-top: 1.6rem;
+      }
+    </style>
+    <script charset="utf-8">
+      window.addEventListener("load", (event) => {
+        document.querySelectorAll(".burger").forEach((burger) => {
+          let nav = document.querySelector("#" + burger.dataset.target);
+          nav.classList.remove("is-active");
+
+          burger.addEventListener("click", (e)=> {
+            burger.classList.toggle("is-active");
+            nav.classList.toggle("is-active");
+          });
+        });
+      });
+    </script>
+    {% block head %}
+    {% endblock %}
+  </head>
+  <body class="is-light">
+
+    <!-- Top Navbar -->
+    <nav class="navbar is-spaced is-light" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <!-- Start of navbar -->
+        <a class="navbar-item is-active" href="/">
+          <img src="{{ url_for('static', filename='png/mediapanel_logo.png') }}"/>
+        </a>
+
+        <!-- Burger for mobile or small screen -->
+        <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="main_navbar">
+          <!-- Required to make the burger -->
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="main_navbar" class="navbar-menu is-active">
+        <div class="navbar-start">
+          <a class="navbar-item" href="">Manage Devices</a>
+          <a class="navbar-item" href="">Manage Groups</a>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link" href="#">Manage Users</a>
+            <div class="navbar-dropdown">
+              <a class="navbar-item" href="">Users</a>
+              <a class="navbar-item" href="">Permission Profiles</a>
+            </div>
+          </div>
+          <a class="navbar-item" href="">View Licenses</a>
+          <a class="navbar-item" href="https://mediapanel.github.io/beta">Documentation</a>
+          {% block navbar_start %}
+          {% endblock %}
+        </div>
+
+        <div class="navbar-end">
+          {% block navbar_end %}
+          {% endblock %}
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link" href="#">Hi,&nbsp;<span>User</span></a>
+            <div class="navbar-dropdown is-right">
+              <a class="navbar-item" href="">Account Settings</a>
+              <a class="navbar-item" href="">User Settings</a>
+              <hr class="navbar-divider">
+              <a class="navbar-item" href="/auth/logout">Log Out</a>
+            </div>
+          </div>
+          <a class="navbar-item" href="mailto:support@getmediapanel.com">Support</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- "At a Glance" page -->
+    <section class="section">
+      <div class="container is-widescreen">
+        {% block body %}
+        {% endblock %}
+      </div>
+    </section>
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          Visit
+          <a href="https://educatethewait.com">Educate the Wait</a>
+          to purchase new mediaPanel devices, manage your license subscriptions,
+          and learn more about other services that we have to offer.
+        </p>
+        <p>
+          &copy; 2020 Great Plains Marketing
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

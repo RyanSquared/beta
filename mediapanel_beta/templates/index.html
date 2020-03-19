@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="columns is-multiline">
+  <div class="column is-4">
+    <div class="card">
+      <div class="card-content">
+        <div class="content">
+          <h3 class="title is-h3 has-text-grey-dark">Device Status</h3>
+
+          <p>
+            {{ online | count }}
+            devices are <span class="has-text-success">online</span>
+            and receiving content updates.
+          </p>
+
+          {% if offline %}
+            <p>
+              {{ offline | count }}
+              devices are <span class="has-text-danger">offline</span>
+              and not receiving content updates. The devices are:
+            </p>
+            <ul>
+            {% for device in offline %}
+              <li>
+                <a href="{{ device.device_id }}" target="_blank">
+                  <!-- ::TODO:: URL to link to device config -->
+                  {{ device.nickname }}
+                </a>
+                (Offline for {{ device.offline_for }})
+              </li>
+            {% endfor %}
+            </ul>
+          {% else %}
+            <p>
+              No devices are offline.
+            </p>
+          {% endif %}
+
+          {% if out_of_date %}
+            <p>
+              The following devices are out of date and need to be updated:
+            </p>
+            <ul>
+            {% for device in out_of_date %}
+              <li>
+                <a href="{{ device.device_id }}" target="_blank">
+                  <!-- ::TODO:: URL to link to device config -->
+                  {{ device.nickname }}
+                </a>
+                (version {{ device.system_version }})
+              </li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="content">
+          <h3 class="title is-h3 has-text-grey-dark">Storage Space</h3>
+          <p>
+            The following devices have
+            <span class="has-text-warning">low</span>
+            storage space:
+          </p>
+          <ul>
+            <li><a>ETW Box</a> (63%)</li>
+          </ul>
+          <p>
+            The following devices have
+            <span class="has-text-danger">critically low</span>
+            storage space:
+          </p>
+          <ul>
+            <li><a>Lobby</a> (47%)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="column is-4">
+    <div class="card">
+      <div class="card-content">
+        <div class="content">
+          <h3 class="title is-h3 has-text-grey-dark">Ads Overview</h3>
+          <p>The following ads are expiring soon:</p>
+          <ul>
+            <li><a>Cell Booster</a> (In 3 days)</li>
+            <li><a>Audio/Video</a> (In 1 day)</li>
+            <li><a>Video Conferencing</a> (In 4 hours)</li>
+          </ul>
+          <p>The following ads are coming up soon:</p>
+          <ul>
+            <li><a>New Podcast Announcement</a> (In 2 days)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="content">
+          <h3 class="title is-h3 has-text-grey-dark">Need some help?</h3>
+          <p>
+          Contact us by email at
+          <a href="mailto:support@getmediapanel.com">support@getmediapanel.com</a>
+          or by phone at <a href="tel:316-448-2589">+1 316 448 2589</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="column is-4">
+    <div class="card">
+      <div class="card-content">
+        <div class="content">
+          <h3 class="title is-h3 has-text-grey-dark">Calendar and Events</h3>
+          {% if upcoming_events %}
+            <p>The following anniversaries are coming up:</p>
+            <ul>
+              {% for event in upcoming_events %}
+                <li>
+                  <a href="#" target="_blank">{{ event[0] }}</a>
+                  ({{ event[1] }}, {{event[2]}})
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>
+              No anniversaries are coming up.
+            </p>
+          {% endif %}
+          <p>The following calendar events are coming up (limited to 5):</p>
+          <ul>
+            <li><a>Weekly Catch-Up Meeting</a> (March 16)</li>
+            <li><a>Company Dinner</a> (March 18)</li>
+            <li><a>Project Restructuring</a> (March 19)</li>
+            <li><a>Weekly Catch-Up Meeting</a> (March 23)</li>
+            <li><a>New Employee Training</a> (March 24)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

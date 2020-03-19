@@ -1,9 +1,11 @@
 import os
+from datetime import datetime, timedelta
 
-from werkzeug.contrib.fixers import ProxyFix
 from flask import Flask, request, redirect, render_template, jsonify
+from werkzeug.contrib.fixers import ProxyFix
 
 import gigaspoon as gs
+from mediapanel.config import EventsConfig
 
 
 def create_app(test_config: dict = None) -> Flask:
@@ -60,11 +62,100 @@ def create_app(test_config: dict = None) -> Flask:
         return redirect(request.url_rule.rule)
 
     class Index(AppRouteView):
+        """
+        mediaPanel dashboard index page.
+
+        HTML version contains a device status (online/offline/out of date), an
+        expiring/upcoming ads overview, an upcoming calendar and events
+        overview, and a storage space overview.
+        """
+
         template_name = "index.html"
 
         def populate(self):
-            print([x.device_id for x in models.Device.query.all()])
-            return {}
+            now = datetime.fromtimestamp(1568877369)  # TESTING
+            data = {
+                "current_time": int(now.timestamp()),
+                "current_version": "60707",  # ::TODO:: get from VERSION.json?
+            }
+
+            # Get device information {{{
+            devices = []
+            online = []
+            offline = []
+            out_of_date = []
+            device_query = models.Device.query.filter_by(client_id=1)
+            for device in device_query.all():
+                last_ping = device.last_ping.timestamp()
+                storage_percentage = 1 - device.free_disk / device.total_disk
+                offline_delta = data["current_time"] - last_ping
+                if offline_delta > (60 * 60 * 24 * 30):  # x months
+                    offline_for = str(int(offline_delta / (60 * 60 * 24 * 30))) + " months"
+                elif offline_delta > (60 * 60 * 24):  # x days
+                    offline_for = str(int(offline_delta / (60 * 60 * 24))) + " days"
+                elif offline_delta > (60 * 60):  # x hours
+                    offline_for = str(int(offline_delta / (60 * 60))) + " hours"
+                else:  # x minutes
+                    offline_for = str(int(offline_delta / 60)) + " minutes"
+
+                version_numbers = device.system_version.split(".")
+                version = (version_numbers[0] +
+                           version_numbers[1].rjust(2, "0") +
+                           version_numbers[2].rjust(2, "0"))
+
+                device_json = {
+                    "client_id": device.client_id,  # TODO sessionize
+                    "device_id": device.device_id,
+                    "nickname": device.nickname,
+                    "system_version": version,
+                    "offline_for": offline_for,
+                    "last_ping": last_ping,
+                    "storage_percentage": storage_percentage * 100,
+                }
+                devices.append(device_json)
+
+                # Sorting online vs offline
+                if offline_delta < 90:
+                    online.append(device_json)
+                else:
+                    offline.append(device_json)
+
+                # List of out of date devices
+                if version < data["current_version"]:
+                    out_of_date.append(device_json)
+
+            data["devices"] = devices
+            data["online"] = online
+            data["offline"] = offline
+            data["out_of_date"] = out_of_date
+            # }}}
+
+            # Get ads information {{{
+            data["ads"] = {
+                "expiring": [],
+                "upcoming": [],
+            }
+            # }}}
+
+            # Get upcoming calendar and events {{{
+            upcoming_events = []
+            upcoming_range = timedelta(days=30)
+            for device in devices:
+                event_config = EventsConfig.from_v6_id(
+                    device["client_id"], device["device_id"],
+                    base_path=app.config["RESOURCES_FOLDER"])
+                for event_name, event in event_config.events.items():
+                    for person, date in event.events:
+                        event_range = date.replace(year=now.year) - now.date()
+                        print(event_range, upcoming_range)
+                        if timedelta(0) < event_range < upcoming_range:
+                            upcoming_events.append((event_name, person.name,
+                                                    date.strftime("%B %d")))
+            data["upcoming_events"] = upcoming_events
+            print(data["upcoming_events"])
+            # }}}
+
+            return data
 
     app.add_url_rule("/", view_func=Index.as_view("index"))
 

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block body %}
+<!-- no card -->
+<div class="columns">
+  <div class="column is-6 is-offset-3">
+    <!--
+    <a href="https://educatethewait.com">
+      <img class="col-xs-12" src="/assets/img/educate-the-wait/tagline-horizontal-flat.png" />
+    </a>
+    <img class="col-xs-12" src="/assets/img/mediaPanel-logo-notagline-dark.png" alt="mediaPanel">
+    -->
+    <form method="POST">
+      <div class="field">
+        <label class="label">Email address</label>
+        <div class="control">
+          <input class="input" type="email" name="email" id="email" value="">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Password</label>
+        <div class="control">
+          <input class="input" type="password" name="password" id="password" value="">
+        </div>
+      </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <input class="button is-primary" type="submit" name="Submit"
+            id="submit" value="Sign In">
+          <a class="button is-primary" href="{{ url_for(".register") }}">Register</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -2,7 +2,7 @@ from flask import Blueprint
 
 from .resources import ListResources, NewResource, Resource, ResourceFile
 
-blueprint = Blueprint("content_manager", __name__, url_prefix="/content")
+blueprint = Blueprint("content_manager", __name__, url_prefix="/manage")
 
 
 # Resources

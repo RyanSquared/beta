@@ -86,17 +86,18 @@ def create_app(test_config: dict = None) -> Flask:
             offline = []
             out_of_date = []
             for device in g.user.allowed_devices:
-                last_ping = device.last_ping.timestamp()
+                last_ping = device.last_ping
                 storage_percentage = 1 - device.free_disk / device.total_disk
-                offline_delta = data["current_time"] - last_ping
-                if offline_delta > (60 * 60 * 24 * 30):  # x months
-                    offline_for = str(int(offline_delta / (60 * 60 * 24 * 30))) + " months"
-                elif offline_delta > (60 * 60 * 24):  # x days
-                    offline_for = str(int(offline_delta / (60 * 60 * 24))) + " days"
-                elif offline_delta > (60 * 60):  # x hours
-                    offline_for = str(int(offline_delta / (60 * 60))) + " hours"
+                offline_delta = now - last_ping
+                if offline_delta.days > 30:  # x months
+                    offline_for = str(int(offline_delta.days / 30)) + " months"
+                elif offline_delta.days > 0:  # x days
+                    offline_for = str(int(offline_delta.days)) + " days"
+                elif offline_delta.seconds > (60 * 60):  # x hours
+                    offline_for = str(int(offline_delta.seconds / (60 * 60))) + " hours"
                 else:  # x minutes
-                    offline_for = str(int(offline_delta / 60)) + " minutes"
+                    offline_for = str(int(offline_delta.seconds / 60)) + " minutes"
+
 
                 version_numbers = device.system_version.split(".")
                 version = (version_numbers[0] +
@@ -108,13 +109,13 @@ def create_app(test_config: dict = None) -> Flask:
                     "nickname": device.nickname,
                     "system_version": version,
                     "offline_for": offline_for,
-                    "last_ping": last_ping,
+                    "last_ping": last_ping.timestamp(),
                     "storage_percentage": storage_percentage * 100,
                 }
                 devices.append(device_json)
 
                 # Sorting online vs offline
-                if offline_delta < 90:
+                if offline_delta.days or offline_delta.seconds < 90:
                     online.append(device_json)
                 else:
                     offline.append(device_json)

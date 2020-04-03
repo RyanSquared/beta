@@ -152,6 +152,9 @@ def create_app(test_config: dict = None) -> Flask:
                     }
             except FileNotFoundError as e:
                 logging.error("No ads report found", e)
+            finally:
+                if "ads" not in data:
+                    data["ads"] = {"expiring_ads": [], "upcoming_ads": []}
             # }}}
 
             # Get upcoming calendar and events {{{

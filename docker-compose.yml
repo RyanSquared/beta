@@ -44,3 +44,8 @@ services:
 volumes:
   db_data:
   applets:
+  ssh_mediapanel_assets:
+    driver: vieux/sshfs:latest
+    driver_opts:
+      sshcmd: "${SSH_MEDIAPANEL_ASSETS_HOST}:${SSH_MEDIAPANEL_ASSETS_ROOT}"
+      password: "${SSH_MEDIAPANEL_ASSETS_AUTH}"

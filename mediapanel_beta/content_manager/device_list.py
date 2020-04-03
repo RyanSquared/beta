@@ -43,7 +43,7 @@ class ListDevices(AppRouteView):
                 "total_disk": device.total_disk,
                 "free_disk": device.free_disk,
                 "offline_for": offline_for,
-                "is_offline": offline_delta.days > 0 or offline_delta.seconds > 90,
+                "is_offline": offline_delta.days > 0 or offline_delta.seconds > 300,
             })
 
         return {

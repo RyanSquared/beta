@@ -27,7 +27,7 @@ services:
     - ssh_mediapanel_assets:/resources
     - applets:/applets
     # Do a loop; this isn't a oneshot service, when running "live".
-    entrypoint: ["sh", "-c", "while sleep 9; do python /app/service.py; done"]
+    entrypoint: ["sh", "-c", "while sleep 900; do python /app/service.py; done"]
   
 
   # Testing database! Disable this in production deployments.

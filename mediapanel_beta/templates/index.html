@@ -88,16 +88,31 @@
       <div class="card-content">
         <div class="content">
           <h3 class="title is-h3 has-text-grey-dark">Ads Overview</h3>
-          <p>The following ads are expiring soon:</p>
-          <ul>
-            <li><a>Cell Booster</a> (In 3 days)</li>
-            <li><a>Audio/Video</a> (In 1 day)</li>
-            <li><a>Video Conferencing</a> (In 4 hours)</li>
-          </ul>
-          <p>The following ads are coming up soon:</p>
-          <ul>
-            <li><a>New Podcast Announcement</a> (In 2 days)</li>
-          </ul>
+          {% set has_displayed_ads = false %}
+          {% if ads.expiring_ads %}
+            {% set has_displayed_ads = true %}
+            <p>The following ads are expiring soon:</p>
+            <ul>
+              {% for ad in ads.expiring_ads %}
+                <li><a href="{{ ad.link }}">{{ ad.name }}</a> (In {{ ad.time_left }})</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if ads.upcoming_ads %}
+            {% set has_displayed_ads = true %}
+            <p>The following ads are coming up soon:</p>
+            <ul>
+              {% for ad in ads.upcoming_ads %}
+                <li><a href="{{ ad.link }}">{{ ad.name }}</a> (In {{ ad.time_left }})</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if not has_displayed_ads %}
+            <p>
+              You have no ads that are coming up soon, and no ads that are
+              expiring soon.
+            </p>
+          {% endif %}
         </div>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import json
+import logging
 import os
 from datetime import datetime, timedelta
 
@@ -73,18 +75,13 @@ def create_app(test_config: dict = None) -> Flask:
         decorators = [auth.login_redirect]
         template_name = "index.html"
 
-        def populate(self):
+        def get_device_stats(self, data):
             now = datetime.now()
-            data = {
-                "current_time": int(now.timestamp()),
-                "current_version": "60708",  # ::TODO:: get from VERSION.json?
-            }
-
-            # Get device information {{{
             devices = []
             online = []
             offline = []
             out_of_date = []
+
             for device in g.user.allowed_devices:
                 last_ping = device.last_ping
                 storage_percentage = 1 - device.free_disk / device.total_disk
@@ -97,7 +94,6 @@ def create_app(test_config: dict = None) -> Flask:
                     offline_for = str(int(offline_delta.seconds / (60 * 60))) + " hours"
                 else:  # x minutes
                     offline_for = str(int(offline_delta.seconds / 60)) + " minutes"
-
 
                 version_numbers = device.system_version.split(".")
                 version = (version_numbers[0] +
@@ -115,14 +111,26 @@ def create_app(test_config: dict = None) -> Flask:
                 devices.append(device_json)
 
                 # Sorting online vs offline
-                if offline_delta.days or offline_delta.seconds < 90:
-                    online.append(device_json)
-                else:
+                if offline_delta.days or offline_delta.seconds > 300:
                     offline.append(device_json)
+                else:
+                    online.append(device_json)
 
                 # List of out of date devices
                 if version < data["current_version"]:
                     out_of_date.append(device_json)
+
+            return devices, online, offline, out_of_date
+
+        def populate(self):
+            now = datetime.now()
+            data = {
+                "current_time": int(now.timestamp()),
+                "current_version": "60708",  # ::TODO:: get from VERSION.json?
+            }
+
+            # Get device information {{{
+            devices, online, offline, out_of_date = self.get_device_stats(data)
 
             data["devices"] = devices
             data["online"] = online
@@ -131,13 +139,23 @@ def create_app(test_config: dict = None) -> Flask:
             # }}}
 
             # Get ads information {{{
-            data["ads"] = {
-                "expiring": [],
-                "upcoming": [],
-            }
+            try:
+                with open("/applets/ads_report.json") as f:
+                    ads_report = json.load(f)
+                    client_id = str(g.client.client_id)  # JSON limitation
+                    logging.error("%r %r", g.client.client_id, ads_report)
+                    expiring = ads_report["expiring"].get(client_id, [])
+                    upcoming = ads_report["upcoming"].get(client_id, [])
+                    data["ads"] = {
+                        "expiring_ads": expiring,
+                        "upcoming_ads": upcoming,
+                    }
+            except FileNotFoundError as e:
+                logging.error("No ads report found", e)
             # }}}
 
             # Get upcoming calendar and events {{{
+            # TODO applet-ify
             upcoming_events = []
             upcoming_range = timedelta(days=30)
             for device in devices:
@@ -153,7 +171,8 @@ def create_app(test_config: dict = None) -> Flask:
                                                         date.strftime("%B %d")))
                 except FileNotFoundError:
                     # Expected if a device has no events
-                    pass
+                    logging.debug("Could not find events for: %s",
+                                  device["device_id"])
             data["upcoming_events"] = upcoming_events
             # }}}
 

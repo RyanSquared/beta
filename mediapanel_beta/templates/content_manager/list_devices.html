@@ -83,7 +83,7 @@
               <td>{{ device.device_ip }}</td>
               <td>
                 {% if device.is_offline %}
-                  <span class="tag is-info">Offline for {{ device.offline_for }}</span></td>
+                  <span class="tag is-danger">Offline for {{ device.offline_for }}</span></td>
                 {% else %}
                   <span class="tag is-info">Online <i class="material-icons">wifi</i></span></td>
                 {% endif %}

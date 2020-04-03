@@ -143,7 +143,6 @@ def create_app(test_config: dict = None) -> Flask:
                 with open("/applets/ads_report.json") as f:
                     ads_report = json.load(f)
                     client_id = str(g.client.client_id)  # JSON limitation
-                    logging.error("%r %r", g.client.client_id, ads_report)
                     expiring = ads_report["expiring"].get(client_id, [])
                     upcoming = ads_report["upcoming"].get(client_id, [])
                     data["ads"] = {

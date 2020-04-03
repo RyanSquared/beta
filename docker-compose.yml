@@ -1,5 +1,7 @@
 version: '3'
 services:
+
+  # v7 dashboard!
   mediapanel:
     build: .
     ports:
@@ -13,6 +15,22 @@ services:
     # FLASK_SECRET_KEY
     # FLASK_SQLALCHEMY_DATABASE_URI
     - config.mysql.env
+    volumes:
+    #- ${PWD}/device_config/:/resources
+    - ssh_mediapanel_assets:/resources
+    - applets:/applets
+
+  # Applets!
+  ads_applet:
+    build: applets/ads
+    volumes:
+    - ssh_mediapanel_assets:/resources
+    - applets:/applets
+    # Do a loop; this isn't a oneshot service, when running "live".
+    entrypoint: ["sh", "-c", "while sleep 9; do python /app/service.py; done"]
+  
+
+  # Testing database! Disable this in production deployments.
   db:
     image: mysql
     environment:
@@ -25,3 +43,4 @@ services:
     - ${PWD}/schema.mysql.sql:/docker-entrypoint-initdb.d/schema.sql
 volumes:
   db_data:
+  applets:

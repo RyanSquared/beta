@@ -10,11 +10,6 @@ directory, which will be used for generating a report on what ads are coming
 up and what ads are going to go out of date.
 """
 
-# TODO BEFORE DEPLOY
-# Sort by client_id
-# Parse globbed filename
-# See todo down below
-
 import glob
 import itertools
 import json
@@ -45,7 +40,7 @@ def readable_time_until(now: datetime, then: date):
             return f"{td.days} days"
     elif td.seconds > 60 * 60:
         # Hours
-        if td.seconds // (60 * 60) > 1:
+        if td.seconds // (60 * 60) < 2:
             return "1 hour"
         else:
             return f"{td.seconds // (60 * 60)} hours"
@@ -69,8 +64,6 @@ upcoming_ads = {}
 expiring_ads = {}
 today = date.today()
 now = datetime.now()
-
-# TODO make upcoming and expiring Dict[client_id, List[Ad]]
 
 for filename in itertools.chain(*matched_files):
     client_id = filename.split("/")[2]

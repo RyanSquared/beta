@@ -127,6 +127,6 @@ for client_id_str in listdir(BASE):
                          client_id)
 
         except IOError as e:
-            logging.error("IOError with file %r: %e", filename, e)
+            logging.error("IOError with file %r: %r", filename, e)
         except Exception as e:
-            logging.error("Generic exception with file %r: %e", filename, e)
+            logging.error("Generic exception with file %r: %r", filename, e)

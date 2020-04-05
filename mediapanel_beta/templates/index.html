@@ -89,20 +89,20 @@
         <div class="content">
           <h3 class="title is-h3 has-text-grey-dark">Ads Overview</h3>
           {% set has_displayed_ads = false %}
-          {% if ads.expiring_ads %}
+          {% if ads.expiring %}
             {% set has_displayed_ads = true %}
             <p>The following ads are expiring soon:</p>
             <ul>
-              {% for ad in ads.expiring_ads %}
+              {% for ad in ads.expiring %}
                 <li><a href="{{ ad.link }}">{{ ad.name }}</a> (In {{ ad.time_left }})</li>
               {% endfor %}
             </ul>
           {% endif %}
-          {% if ads.upcoming_ads %}
+          {% if ads.upcoming %}
             {% set has_displayed_ads = true %}
             <p>The following ads are coming up soon:</p>
             <ul>
-              {% for ad in ads.upcoming_ads %}
+              {% for ad in ads.upcoming %}
                 <li><a href="{{ ad.link }}">{{ ad.name }}</a> (In {{ ad.time_left }})</li>
               {% endfor %}
             </ul>

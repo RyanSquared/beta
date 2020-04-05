@@ -8,6 +8,7 @@ from werkzeug.contrib.fixers import ProxyFix
 
 import gigaspoon as gs
 from mediapanel.config import EventsConfig
+from mediapanel.applets import StorageManager
 
 
 def create_app(test_config: dict = None) -> Flask:
@@ -140,16 +141,18 @@ def create_app(test_config: dict = None) -> Flask:
 
             # Get ads information {{{
             try:
-                with open("/applets/ads_report.json") as f:
-                    ads_report = json.load(f)
-                    client_id = str(g.client.client_id)  # JSON limitation
-                    expiring = ads_report["expiring"].get(client_id, [])
-                    upcoming = ads_report["upcoming"].get(client_id, [])
-                    data["ads"] = {
-                        "expiring_ads": expiring,
-                        "upcoming_ads": upcoming,
-                    }
-            except FileNotFoundError as e:
+                client_id = g.client.client_id
+                ads_mgr = StorageManager("media_scheduler", "index",
+                                         client_id)
+                ads_report = ads_mgr.load()
+                expiring = ads_report["expiring"]
+                upcoming = ads_report["upcoming"]
+                data["ads"] = {
+                    "expiring": expiring,
+                    "upcoming": upcoming,
+                }
+            except IOError as e:
+                # Any IO error from StorageManager loading the files
                 logging.error("No ads report found: %r", e)
             finally:
                 if "ads" not in data:

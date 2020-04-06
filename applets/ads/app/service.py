@@ -17,37 +17,23 @@ from datetime import date, datetime, timedelta
 from os import listdir
 from os.path import join
 
+from mediapanel.applets import StorageManager
 from mediapanel.config.ads import (AdsConfig, AdsVerticalConfig,
                                    AdsHorizontalConfig)
-from mediapanel.applets import StorageManager
+from mediapanel.timedelta import human_readable
 
 logging.basicConfig(level=logging.DEBUG)
 
 
 def readable_time_until(now: datetime, then: date):
     """
-    Create a representation of how long until a time is reached. Will generate
-    a string with reasonable breaks at "60 minutes" => "1 hour", "24 hours" =>
-    "1 day". Does not need anything higher as this script doesn't go past 5
-    days.
+    Use a mediaPanel utility function to generate a human-readable
+    representation of how long until an event happens.
     """
     then_datetime = datetime(year=then.year, month=then.month, day=then.day)
     td = abs(now - then_datetime)
 
-    if td.days:
-        # Days
-        if td.days == 1:
-            return "1 day"
-        else:
-            return f"{td.days} days"
-    elif td.seconds > 60 * 60:
-        # Hours
-        if td.seconds // (60 * 60) < 2:
-            return "1 hour"
-        else:
-            return f"{td.seconds // (60 * 60)} hours"
-    # Minutes; "1 minutes" case is so rare I don't care about it
-    return f"{td.seconds // 60} minutes"
+    return human_readable(td)
 
 
 # Find files for ad configs
@@ -122,6 +108,7 @@ for client_id_str in listdir(BASE):
                         "link": "#",
                         "time_left": readable_time_until(now, end_time)})
 
+            logging.debug("Saving ads for client: %r", client_id)
             # Store upcoming and expiring advertisements to file
             ads_mgr.save({"upcoming": upcoming, "expiring": expiring},
                          client_id)

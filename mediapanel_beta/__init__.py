@@ -161,17 +161,22 @@ def create_app(test_config: dict = None) -> Flask:
                     event_config = EventsConfig.from_v6_id(
                         g.client.client_id, device["device_id"],
                         base_path=app.config["RESOURCES_FOLDER"])
-                    for event_name, event in event_config.events.items():
-                        for person, date in event.events:
-                            event_range = date.replace(year=now.year) - now.date()
-                            if timedelta(0) < event_range < upcoming_range:
-                                upcoming_events.append((event_name, person.name,
-                                                        date.strftime("%B %d")))
                 except FileNotFoundError:
                     # Expected if a device has no events
                     logging.debug("Could not find events for: %s",
                                   device["device_id"])
-            data["upcoming_events"] = upcoming_events
+                    continue
+                except IOError as e:
+                    logging.error("Could not load events for %s: %r",
+                                  device["device_id"], e)
+                    continue
+                for event_name, event in event_config.events.items():
+                    for person, date in event.events:
+                        event_range = date.replace(year=now.year) - now.date()
+                        if timedelta(0) < event_range < upcoming_range:
+                            upcoming_events.append((event_name, person.name,
+                                                    date.strftime("%B %d")))
+            data["events"] = {"upcoming_events": upcoming_events}
             # }}}
 
             return data

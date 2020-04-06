@@ -136,10 +136,10 @@
       <div class="card-content">
         <div class="content">
           <h3 class="title is-h3 has-text-grey-dark">Calendar and Events</h3>
-          {% if upcoming_events %}
+          {% if events.upcoming_events %}
             <p>The following anniversaries are coming up:</p>
             <ul>
-              {% for event in upcoming_events %}
+              {% for event in events.upcoming_events %}
                 <li>
                   <a href="#" target="_blank">{{ event[0] }}</a>
                   ({{ event[1] }}, {{event[2]}})

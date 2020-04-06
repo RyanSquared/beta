@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from datetime import datetime, timedelta
@@ -7,8 +6,9 @@ from flask import Flask, g, request, redirect, render_template, jsonify
 from werkzeug.contrib.fixers import ProxyFix
 
 import gigaspoon as gs
-from mediapanel.config import EventsConfig
 from mediapanel.applets import StorageManager
+from mediapanel.config import EventsConfig
+from mediapanel.timedelta import human_readable as human_readable_timedelta
 
 
 def create_app(test_config: dict = None) -> Flask:
@@ -87,14 +87,7 @@ def create_app(test_config: dict = None) -> Flask:
                 last_ping = device.last_ping
                 storage_percentage = 1 - device.free_disk / device.total_disk
                 offline_delta = now - last_ping
-                if offline_delta.days > 30:  # x months
-                    offline_for = str(int(offline_delta.days / 30)) + " months"
-                elif offline_delta.days > 0:  # x days
-                    offline_for = str(int(offline_delta.days)) + " days"
-                elif offline_delta.seconds > (60 * 60):  # x hours
-                    offline_for = str(int(offline_delta.seconds / (60 * 60))) + " hours"
-                else:  # x minutes
-                    offline_for = str(int(offline_delta.seconds / 60)) + " minutes"
+                offline_for = human_readable_timedelta(offline_delta)
 
                 version_numbers = device.system_version.split(".")
                 version = (version_numbers[0] +

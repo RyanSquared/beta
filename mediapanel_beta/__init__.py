@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 
 from flask import Flask, g, request, redirect, render_template, jsonify
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import gigaspoon as gs
 from mediapanel.applets import StorageManager

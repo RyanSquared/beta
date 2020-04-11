@@ -1,4 +1,4 @@
-FROM tiangolo/uwsgi-nginx-flask:python3.6
+FROM tiangolo/uwsgi-nginx-flask:python3.7
 
 # Git-versioned dependencies
 RUN pip3 install git+https://github.com/RyanSquared/gigaspoon
